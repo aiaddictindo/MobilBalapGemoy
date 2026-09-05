@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "PlayerProfile": {
+      "title": "PlayerProfile",
+      "description": "Profil pemain termasuk skor, statistik kemenangan, karakter dan kendaraan terpilih",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID autentikasi pemain" },
+        "displayName": { "type": "string", "description": "Nama tampilan pemain" },
+        "photoURL": { "type": "string", "description": "Avatar atau URL foto pemain" },
+        "totalScore": { "type": "number", "description": "Total skor kumulatif permainan" },
+        "totalWins": { "type": "number", "description": "Total balapan yang dimenangkan" },
+        "totalRaces": { "type": "number", "description": "Total jumlah balapan yang diikuti" },
+        "highPaintPercent": { "type": "number", "description": "Persentase cat jalanan tertinggi" },
+        "selectedCharacter": { "type": "string", "description": "Emoji karakter aktif" },
+        "selectedVehicle": { "type": "string", "description": "Emoji kendaraan aktif" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Waktu pembaruan terakhir" }
+      },
+      "required": ["userId", "displayName", "totalScore", "totalWins", "totalRaces"]
+    },
+    "GameRoom": {
+      "title": "GameRoom",
+      "description": "Ruang balapan untuk matchmaking dan sinkronisasi permainan",
+      "type": "object",
+      "properties": {
+        "roomId": { "type": "string", "description": "ID unik atau kode ruang balap" },
+        "roomName": { "type": "string", "description": "Nama ruang" },
+        "hostId": { "type": "string", "description": "ID pemain pembuat ruang" },
+        "status": { "type": "string", "enum": ["waiting", "playing", "finished"], "description": "Status permainan" },
+        "gameSpeed": { "type": "number", "description": "Kecepatan permainan (1 = normal, 1.5 = cepat, 2 = turbo)" },
+        "botDifficulty": { "type": "string", "enum": ["easy", "medium", "hard"], "description": "Tingkat kesulitan bot lawan" },
+        "maxPlayers": { "type": "number", "description": "Maksimal pemain dalam ruang (maksimal 8)" },
+        "currentPlayersCount": { "type": "number", "description": "Jumlah pemain saat ini" },
+        "winnerId": { "type": "string", "description": "ID pemenang balapan" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu pembuatan ruang" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Waktu pembaruan ruang" }
+      },
+      "required": ["roomId", "hostId", "status", "gameSpeed", "maxPlayers"]
+    },
+    "RoomMember": {
+      "title": "RoomMember",
+      "description": "Anggota yang bergabung dalam room (pemain asli atau bot)",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string", "description": "ID pemain atau bot" },
+        "displayName": { "type": "string", "description": "Nama tampilan" },
+        "isBot": { "type": "boolean", "description": "Apakah pemain ini bot otomatis" },
+        "character": { "type": "string", "description": "Emoji karakter" },
+        "vehicle": { "type": "string", "description": "Emoji kendaraan" },
+        "isReady": { "type": "boolean", "description": "Status kesiapan" },
+        "score": { "type": "number", "description": "Skor akhir balapan" },
+        "paintPercent": { "type": "number", "description": "Persentase jalan dicat" },
+        "color": { "type": "string", "description": "Warna jalur cat pemain" }
+      },
+      "required": ["memberId", "displayName", "character", "vehicle", "isBot"]
+    },
+    "RoomChatMessage": {
+      "title": "RoomChatMessage",
+      "description": "Pesan obrolan real-time dalam lobi room balap",
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string", "description": "ID pesan obrolan" },
+        "senderId": { "type": "string", "description": "ID pengirim" },
+        "senderName": { "type": "string", "description": "Nama pengirim" },
+        "senderAvatar": { "type": "string", "description": "Emoji karakter pengirim" },
+        "text": { "type": "string", "description": "Isi teks obrolan", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu pengiriman" }
+      },
+      "required": ["messageId", "senderId", "senderName", "text"]
+    },
+    "RoomLiveState": {
+      "title": "RoomLiveState",
+      "description": "Posisi dan kondisi balap pemain real-time",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string", "description": "ID pemain atau bot" },
+        "x": { "type": "number", "description": "Posisi koordinat X horizontal" },
+        "tier": { "type": "number", "description": "Tingkat jalan/tier (0 sampai 3)" },
+        "vx": { "type": "number", "description": "Kecepatan horizontal" },
+        "direction": { "type": "number", "description": "Arah hadap (-1 kiri, 1 kanan)" },
+        "isJumping": { "type": "boolean", "description": "Apakah sedang melompat" },
+        "isSpinning": { "type": "boolean", "description": "Kondisi terkena oli/berputar" },
+        "paintCount": { "type": "number", "description": "Jumlah ubin jalan yang berhasil dicat" },
+        "score": { "type": "number", "description": "Skor saat ini" },
+        "updatedAt": { "type": "number", "description": "Timestamp update posisi milidetik" }
+      },
+      "required": ["memberId", "x", "tier", "paintCount", "score"]
+    },
+    "GameInvite": {
+      "title": "GameInvite",
+      "description": "Undangan bermain bersama teman",
+      "type": "object",
+      "properties": {
+        "inviteId": { "type": "string", "description": "ID undangan" },
+        "senderId": { "type": "string", "description": "ID pengirim undangan" },
+        "senderName": { "type": "string", "description": "Nama pengirim undangan" },
+        "receiverId": { "type": "string", "description": "ID penerima atau all untuk siaran" },
+        "roomId": { "type": "string", "description": "Kode room balapan yang dituju" },
+        "roomName": { "type": "string", "description": "Nama room balapan" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "expired"], "description": "Status undangan" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu undangan dibuat" }
+      },
+      "required": ["inviteId", "senderId", "senderName", "roomId", "status"]
+    }
+  },
+  "firestore": {
+    "/players/{userId}": {
+      "schema": { "$ref": "#/entities/PlayerProfile" },
+      "description": "Koleksi data profil pemain dan riwayat progres permanen"
+    },
+    "/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/GameRoom" },
+      "description": "Koleksi ruang balap aktif untuk matchmaking dan multiplayer"
+    },
+    "/rooms/{roomId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/RoomMember" },
+      "description": "Subkoleksi anggota pemain dan bot dalam ruang balap"
+    },
+    "/rooms/{roomId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/RoomChatMessage" },
+      "description": "Subkoleksi pesan obrolan lobi room"
+    },
+    "/rooms/{roomId}/liveState/{memberId}": {
+      "schema": { "$ref": "#/entities/RoomLiveState" },
+      "description": "Subkoleksi posisi real-time dan skor pemain saat balapan berlangsung"
+    },
+    "/invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/GameInvite" },
+      "description": "Koleksi undangan bermain untuk notifikasi push teman"
+    }
+  }
+}

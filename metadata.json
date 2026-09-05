@@ -1,0 +1,6 @@
+{
+  "name": "Mini Balap Gemoy",
+  "description": "Game balap arena platformer seru dengan karakter emoji lucu, kendaraan unik bertingkat, mewarnai jalan, lobi online real-time, mode solo offline, dan bot cerdas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

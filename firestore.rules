@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Players collection
+    match /players/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && (request.auth.uid == userId);
+      allow delete: if false;
+    }
+
+    // Game rooms collection
+    match /rooms/{roomId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(roomId);
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && (resource.data.hostId == request.auth.uid);
+
+      // Members subcollection
+      match /members/{memberId} {
+        allow read, list: if isSignedIn();
+        allow create, update: if isSignedIn() && isValidId(memberId);
+        allow delete: if isSignedIn();
+      }
+
+      // Lobby chat messages
+      match /messages/{messageId} {
+        allow read, list: if isSignedIn();
+        allow create: if isSignedIn() && isValidId(messageId) && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if isSignedIn() && (resource.data.senderId == request.auth.uid);
+      }
+
+      // Live game state / coordinates during race
+      match /liveState/{memberId} {
+        allow read, list: if isSignedIn();
+        allow create, update: if isSignedIn() && isValidId(memberId);
+        allow delete: if isSignedIn();
+      }
+    }
+
+    // Game friend invites
+    match /invites/{inviteId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(inviteId) && request.resource.data.senderId == request.auth.uid;
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn() && (resource.data.senderId == request.auth.uid);
+    }
+  }
+}
