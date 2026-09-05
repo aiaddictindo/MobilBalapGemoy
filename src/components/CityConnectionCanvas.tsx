@@ -844,14 +844,14 @@ export const CityConnectionCanvas: React.FC<Props> = ({
         }
       });
 
-      // Calculate total painted percentage
+      // Calculate total painted percentage (track territory)
       const totalTiles = tilesRef.current.length;
-      const paintedTiles = tilesRef.current.filter((t) => t.paintedBy !== null).length;
-      const paintedPercent = Math.round((paintedTiles / Math.max(1, totalTiles)) * 100);
-      setTotalPaintedPercent(paintedPercent);
+      const userPainted = tilesRef.current.filter((t) => t.paintedBy === currentUserMember.memberId).length;
+      const userPercent = Math.round((userPainted / Math.max(1, totalTiles)) * 100);
+      setTotalPaintedPercent(userPercent);
 
-      // Check 100% paint finish condition
-      if (paintedPercent >= 98 && !isGameOver) {
+      // Rare instant victory: Only if a single player dominates 100% of the entire track alone
+      if (userPainted === totalTiles && totalTiles > 0 && !isGameOver) {
         finishRace();
       }
 
@@ -1234,7 +1234,7 @@ export const CityConnectionCanvas: React.FC<Props> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full flex flex-col items-center select-none ${
+      className={`relative w-full max-w-full overflow-x-hidden flex flex-col items-center select-none ${
         isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-900 text-white'
       }`}
     >

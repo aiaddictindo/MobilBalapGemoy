@@ -270,16 +270,74 @@ export default function App() {
         await savePlayerProfile(newProfile);
         setPlayerProfile(newProfile);
       }
-    } catch (error) {
-      console.warn('Login canceled or failed:', error);
+      setNotificationBanner(`🎉 Selamat datang, ${user.displayName || 'Pembalap'}!`);
+      setTimeout(() => setNotificationBanner(null), 3500);
+    } catch (error: unknown) {
+      console.warn('Login notice:', error);
+      const err = error as { code?: string; message?: string };
+      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
+        setNotificationBanner('⚠️ Domain GitHub Pages belum diotorisasi di Firebase. Tambahkan di Firebase Console > Auth > Authorized domains. Anda tetap bisa main mode Tamu/Solo!');
+        setTimeout(() => setNotificationBanner(null), 9000);
+      } else if (err?.code !== 'auth/popup-closed-by-user') {
+        setNotificationBanner('⚠️ Login Google belum berhasil diselesaikan.');
+        setTimeout(() => setNotificationBanner(null), 4000);
+      }
     }
   };
 
   const handleLogout = async () => {
-    await logoutUser();
-    setCurrentRoom(null);
-    setAuthUser(null);
-    setPlayerProfile(null);
+    try {
+      // Clean up all active Firestore listeners before signOut to prevent permission errors
+      if (invitesUnsubRef.current) {
+        invitesUnsubRef.current();
+        invitesUnsubRef.current = null;
+      }
+      if (roomUnsubRef.current) {
+        roomUnsubRef.current();
+        roomUnsubRef.current = null;
+      }
+      if (membersUnsubRef.current) {
+        membersUnsubRef.current();
+        membersUnsubRef.current = null;
+      }
+      if (chatUnsubRef.current) {
+        chatUnsubRef.current();
+        chatUnsubRef.current = null;
+      }
+      if (liveUnsubRef.current) {
+        liveUnsubRef.current();
+        liveUnsubRef.current = null;
+      }
+
+      setCurrentRoom(null);
+      setRoomMembers([]);
+      setChatMessages([]);
+      setLiveStates({});
+      setGameInvites([]);
+
+      await logoutUser();
+      soundManager.playClick();
+      setNotificationBanner('👋 Berhasil keluar dari akun Google.');
+      setTimeout(() => setNotificationBanner(null), 3000);
+    } catch (error) {
+      console.warn('Logout notice:', error);
+    } finally {
+      setAuthUser(null);
+      setPlayerProfile({
+        userId: 'guest_' + Math.floor(Math.random() * 10000),
+        displayName: 'Pembalap Tamu',
+        totalScore: 0,
+        totalWins: 0,
+        totalRaces: 0,
+        highPaintPercent: 0,
+        selectedCharacter: '🦁',
+        selectedVehicle: '🦖',
+        createdAt: new Date().toISOString(),
+      });
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+      }
+    }
   };
 
   // Join or Create Room Handlers
@@ -543,7 +601,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
+      className={`min-h-screen max-w-full overflow-x-hidden flex flex-col font-sans transition-colors duration-200 ${
         isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'
       }`}
     >
